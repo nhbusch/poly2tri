@@ -1,4 +1,4 @@
-/*
+/* 
  * Poly2Tri Copyright (c) 2009-2010, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
  *
@@ -28,91 +28,45 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef ADVANCED_FRONT_H
-#define ADVANCED_FRONT_H
-
-#include "../common/shapes.h"
+#include "sweep/cdt.h"
 
 namespace p2t {
 
-struct Node;
-
-// Advancing front node
-struct Node {
-  Point* point;
-  Triangle* triangle;
-
-  Node* next;
-  Node* prev;
-
-  double value;
-
-  Node(Point& p) : point(&p), triangle(NULL), next(NULL), prev(NULL), value(p.x)
-  {
-  }
-
-  Node(Point& p, Triangle& t) : point(&p), triangle(&t), next(NULL), prev(NULL), value(p.x)
-  {
-  }
-
-};
-
-// Advancing front
-class AdvancingFront {
-public:
-
-AdvancingFront(Node& head, Node& tail);
-// Destructor
-~AdvancingFront();
-
-Node* head();
-void set_head(Node* node);
-Node* tail();
-void set_tail(Node* node);
-Node* search();
-void set_search(Node* node);
-
-/// Locate insertion point along advancing front
-Node* LocateNode(const double& x);
-
-Node* LocatePoint(const Point* point);
-
-private:
-
-Node* head_, *tail_, *search_node_;
-
-Node* FindSearchNode(const double& x);
-};
-
-inline Node* AdvancingFront::head()
+CDT::CDT(std::vector<Point*> polyline)
 {
-  return head_;
-}
-inline void AdvancingFront::set_head(Node* node)
-{
-  head_ = node;
+  sweep_context_ = new SweepContext(polyline);
+  sweep_ = new Sweep;
 }
 
-inline Node* AdvancingFront::tail()
+void CDT::AddHole(std::vector<Point*> polyline)
 {
-  return tail_;
-}
-inline void AdvancingFront::set_tail(Node* node)
-{
-  tail_ = node;
+  sweep_context_->AddHole(polyline);
 }
 
-inline Node* AdvancingFront::search()
+void CDT::AddPoint(Point* point) {
+  sweep_context_->AddPoint(point);
+}
+
+void CDT::Triangulate()
 {
-  return search_node_;
+  sweep_->Triangulate(*sweep_context_);
 }
 
-inline void AdvancingFront::set_search(Node* node)
+std::vector<p2t::Triangle*> CDT::GetTriangles()
 {
-  search_node_ = node;
+  return sweep_context_->GetTriangles();
+}
+
+std::list<p2t::Triangle*> CDT::GetMap()
+{
+  return sweep_context_->GetMap();
+}
+
+CDT::~CDT()
+{
+  delete sweep_context_;
+  delete sweep_;
 }
 
 }
 
-#endif

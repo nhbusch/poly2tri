@@ -28,9 +28,9 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "sweep_context.h"
 #include <algorithm>
-#include "advancing_front.h"
+#include "sweep/sweep_context.h"
+#include "sweep/advancing_front.h"
 
 namespace p2t {
 
@@ -102,7 +102,7 @@ void SweepContext::InitTriangulation()
 
 void SweepContext::InitEdges(std::vector<Point*> polyline)
 {
-  int num_points = polyline.size();
+  int num_points = static_cast<int>(polyline.size());
   for (int i = 0; i < num_points; i++) {
     int j = i < num_points - 1 ? i + 1 : 0;
     edge_list.push_back(new Edge(*polyline[i], *polyline[j]));

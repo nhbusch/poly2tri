@@ -28,82 +28,91 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "advancing_front.h"
+
+#ifndef ADVANCED_FRONT_H
+#define ADVANCED_FRONT_H
+
+#include "common/shapes.h"
 
 namespace p2t {
 
-AdvancingFront::AdvancingFront(Node& head, Node& tail)
-{
-  head_ = &head;
-  tail_ = &tail;
-  search_node_ = &head;
-}
+struct Node;
 
-Node* AdvancingFront::LocateNode(const double& x)
-{
-  Node* node = search_node_;
+// Advancing front node
+struct Node {
+  Point* point;
+  Triangle* triangle;
 
-  if (x < node->value) {
-    while ((node = node->prev) != NULL) {
-      if (x >= node->value) {
-        search_node_ = node;
-        return node;
-      }
-    }
-  } else {
-    while ((node = node->next) != NULL) {
-      if (x < node->value) {
-        search_node_ = node->prev;
-        return node->prev;
-      }
-    }
+  Node* next;
+  Node* prev;
+
+  double value;
+
+  Node(Point& p) : point(&p), triangle(NULL), next(NULL), prev(NULL), value(p.x)
+  {
   }
-  return NULL;
+
+  Node(Point& p, Triangle& t) : point(&p), triangle(&t), next(NULL), prev(NULL), value(p.x)
+  {
+  }
+
+};
+
+// Advancing front
+class AdvancingFront {
+public:
+
+AdvancingFront(Node& head, Node& tail);
+// Destructor
+~AdvancingFront();
+
+Node* head();
+void set_head(Node* node);
+Node* tail();
+void set_tail(Node* node);
+Node* search();
+void set_search(Node* node);
+
+/// Locate insertion point along advancing front
+Node* LocateNode(const double& x);
+
+Node* LocatePoint(const Point* point);
+
+private:
+
+Node* head_, *tail_, *search_node_;
+
+Node* FindSearchNode(const double& x);
+};
+
+inline Node* AdvancingFront::head()
+{
+  return head_;
+}
+inline void AdvancingFront::set_head(Node* node)
+{
+  head_ = node;
 }
 
-Node* AdvancingFront::FindSearchNode(const double& x)
+inline Node* AdvancingFront::tail()
 {
-  (void)x; // suppress compiler warnings "unused parameter 'x'"
-  // TODO: implement BST index
+  return tail_;
+}
+inline void AdvancingFront::set_tail(Node* node)
+{
+  tail_ = node;
+}
+
+inline Node* AdvancingFront::search()
+{
   return search_node_;
 }
 
-Node* AdvancingFront::LocatePoint(const Point* point)
+inline void AdvancingFront::set_search(Node* node)
 {
-  const double px = point->x;
-  Node* node = FindSearchNode(px);
-  const double nx = node->point->x;
-
-  if (px == nx) {
-    if (point != node->point) {
-      // We might have two nodes with same x value for a short time
-      if (point == node->prev->point) {
-        node = node->prev;
-      } else if (point == node->next->point) {
-        node = node->next;
-      } else {
-        assert(0);
-      }
-    }
-  } else if (px < nx) {
-    while ((node = node->prev) != NULL) {
-      if (point == node->point) {
-        break;
-      }
-    }
-  } else {
-    while ((node = node->next) != NULL) {
-      if (point == node->point)
-        break;
-    }
-  }
-  if(node) search_node_ = node;
-  return node;
-}
-
-AdvancingFront::~AdvancingFront()
-{
+  search_node_ = node;
 }
 
 }
 
+#endif

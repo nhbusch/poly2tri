@@ -1,0 +1,9 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/@targets_export@.cmake")
+
+# Ensure dependencies are met
+# include(CMakeFindDependencyMacro)
+# find_dependency(Bar [X.Y.Z [REQUIRED]])
+
+check_required_components("@PROJECT_NAME@")
